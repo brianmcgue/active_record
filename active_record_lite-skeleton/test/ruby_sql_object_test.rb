@@ -1,4 +1,5 @@
 require_relative '../lib/active_record_lite'
+# require 'debugger'
 
 # https://tomafro.net/2010/01/tip-relative-paths-with-file-expand-path
 cats_db_file_name =
@@ -21,7 +22,9 @@ p Human.find(1)
 p Cat.find(1)
 p Cat.find(2)
 
+puts "-----------------ABOUT TO FIND ALL HUMANS--------------------"
 p Human.all
+puts "---------------------FOUND ALL HUMANS------------------------"
 p Cat.all
 
 c = Cat.new(:name => "Gizmo", :owner_id => 1)

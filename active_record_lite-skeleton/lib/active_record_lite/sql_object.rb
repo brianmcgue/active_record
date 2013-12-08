@@ -4,7 +4,7 @@ require_relative './mass_object'
 require_relative './searchable'
 
 class SQLObject < MassObject
-  # extend Searchable
+  extend Searchable
   # sets the table_name
   def self.set_table_name(table_name)
     @table_name = table_name
@@ -19,32 +19,23 @@ class SQLObject < MassObject
   # converts resulting array of hashes to an array of objects by calling ::new
   # for each row in the result. (might want to call #to_sym on keys)
   def self.all
-    results = DBConnection.execute(<<-SQL)
-      SELECT
-        *
-      FROM
-        #{self.table_name}
-    SQL
-
-    results.map do |params|
-      self.new(params)
-    end
+    where({"id" => "#{self.table_name}.id"})
+    # results = DBConnection.execute(<<-SQL)
+#       SELECT
+#         *
+#       FROM
+#         #{self.table_name}
+#     SQL
+#
+#     results.map do |params|
+#       self.new(params)
+#     end
   end
 
   # querys database for record of this type with id passed.
   # returns either a single object or nil.
   def self.find(id)
-    result = DBConnection.execute(<<-SQL, id)
-      SELECT
-        *
-      FROM
-        #{self.table_name}
-      WHERE
-        #{self.table_name}.id = ?
-    SQL
-
-    # result = where({self.table_name.id => id})
-    result.empty? ? nil : self.new(result.first)
+    where({"id" => id}).first
   end
 
   # call either create or update depending if id is nil.

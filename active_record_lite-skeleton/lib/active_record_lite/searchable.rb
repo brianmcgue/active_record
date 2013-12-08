@@ -7,32 +7,21 @@ module Searchable
   # returns an array of objects
   def where(params)
     where_params = params.map do |key, value|
-      "#{key} = ?}"
-    end.join(", ")
+      "#{key} = ?"
+    end.join(" AND ")
 
+    puts where_params
     puts params.values
 
-
-    DBConnection.execute(<<-SQL, *params.values)
+    results = DBConnection.execute(<<-SQL, *params.values)
       SELECT
         *
       FROM
-        #{self.table_name}
+        #{table_name}
       WHERE
         #{where_params}
     SQL
-    #
-    # result = DBConnection.execute(<<-SQL, id)
-    #   SELECT
-    #     *
-    #   FROM
-    #     #{self.table_name}
-    #   WHERE
-    #     #{self.table_name}.id = ?
-    # SQL
-    #
-    # result = where({self.table_name.id => id})
-    #
-    #
+
+    parse_all(results)
   end
 end

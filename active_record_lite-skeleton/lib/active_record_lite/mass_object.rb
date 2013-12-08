@@ -29,10 +29,8 @@ class MassObject
   # takes an array of hashes.
   # returns array of objects.
   def self.parse_all(results)
-    [].tap do |objects|
-      results.each do |params|
-        objects << self.new(params)
-      end
+    results.map do |params|
+      self.new(params)
     end
   end
 
@@ -42,7 +40,7 @@ class MassObject
   # is assigned to the instance variable.
   def initialize(params = {})
     params.each do |attr_name, attr_val|
-      attr_name = attr_name.to_sym unless attr_name.is_a?(Symbol)
+      attr_name = attr_name.to_sym if attr_name.is_a?(String)
       if self.class.attributes.include?(attr_name)
         self.send("#{attr_name}=", attr_val)
       else
