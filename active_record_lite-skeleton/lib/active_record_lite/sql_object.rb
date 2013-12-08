@@ -19,17 +19,14 @@ class SQLObject < MassObject
   # converts resulting array of hashes to an array of objects by calling ::new
   # for each row in the result. (might want to call #to_sym on keys)
   def self.all
-    where({"id" => "#{self.table_name}.id"})
-    # results = DBConnection.execute(<<-SQL)
-#       SELECT
-#         *
-#       FROM
-#         #{self.table_name}
-#     SQL
-#
-#     results.map do |params|
-#       self.new(params)
-#     end
+    results = DBConnection.execute(<<-SQL)
+      SELECT
+        *
+      FROM
+        #{self.table_name}
+    SQL
+
+    self.parse_all(results)
   end
 
   # querys database for record of this type with id passed.

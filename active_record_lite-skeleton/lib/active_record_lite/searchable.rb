@@ -10,9 +10,6 @@ module Searchable
       "#{key} = ?"
     end.join(" AND ")
 
-    puts where_params
-    puts params.values
-
     results = DBConnection.execute(<<-SQL, *params.values)
       SELECT
         *
