@@ -14,7 +14,7 @@ class AssocParams
 end
 
 class BelongsToAssocParams < AssocParams
-  attr_accessor :name, :params
+  attr_accessor :name, :params, :foreign_key, :primary_key
   def initialize(name, params)
     new_params = {
       :class_name => name.to_s.split("_").map{|w| w.capitalize}.join(""),
@@ -28,6 +28,8 @@ class BelongsToAssocParams < AssocParams
 
     @name = name
     @params = new_params
+    @foreign_key = new_params[:foreign_key]
+    @primary_key = new_params[:primary_key]
   end
 
   def type
@@ -49,19 +51,8 @@ module Associatable
   def belongs_to(name, params = {})
     aps = BelongsToAssocParams.new(name, params)
     define_method(name) do
-      key = self.send(aps.params[:foreign_key])
-      puts key
-      # debugger
-      results = DBConnection.execute(<<-SQL, key)
-        SELECT
-          *
-        FROM
-          #{aps.other_table}
-        WHERE
-          #{aps.other_table}.#{aps.params[:primary_key]} = ?
-      SQL
-
-      aps.other_class.parse_all(results).first
+      key = self.send(aps.foreign_key)
+      aps.other_class.where({aps.primary_key => key}).first
     end
   end
 
