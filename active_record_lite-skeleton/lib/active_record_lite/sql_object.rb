@@ -4,7 +4,7 @@ require_relative './mass_object'
 require_relative './searchable'
 
 class SQLObject < MassObject
-  extend 'searchable'
+  # extend Searchable
   # sets the table_name
   def self.set_table_name(table_name)
     @table_name = table_name
@@ -42,6 +42,8 @@ class SQLObject < MassObject
       WHERE
         #{self.table_name}.id = ?
     SQL
+
+    # result = where({self.table_name.id => id})
     result.empty? ? nil : self.new(result.first)
   end
 

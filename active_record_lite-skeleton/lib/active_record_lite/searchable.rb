@@ -10,7 +10,10 @@ module Searchable
       "#{key} = ?}"
     end.join(", ")
 
-    DBConnection.execute(<<-SQL, *param.values)
+    puts params.values
+
+
+    DBConnection.execute(<<-SQL, *params.values)
       SELECT
         *
       FROM
@@ -18,5 +21,18 @@ module Searchable
       WHERE
         #{where_params}
     SQL
+    #
+    # result = DBConnection.execute(<<-SQL, id)
+    #   SELECT
+    #     *
+    #   FROM
+    #     #{self.table_name}
+    #   WHERE
+    #     #{self.table_name}.id = ?
+    # SQL
+    #
+    # result = where({self.table_name.id => id})
+    #
+    #
   end
 end
