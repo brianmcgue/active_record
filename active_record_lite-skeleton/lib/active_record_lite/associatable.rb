@@ -12,6 +12,18 @@ end
 
 class BelongsToAssocParams < AssocParams
   def initialize(name, params)
+    new_params = {
+      :class_name => name,
+      :foreign_key => "#{name}_id",
+      :primary_key => "id"
+    }
+
+    params.each do |key, value|
+      new_params[key] = value
+    end
+
+    @name = name
+    @params = new_params
   end
 
   def type
