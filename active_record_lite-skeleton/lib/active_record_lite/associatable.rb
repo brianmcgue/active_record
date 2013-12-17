@@ -18,8 +18,8 @@ class BelongsToAssocParams < AssocParams
   def initialize(name, params)
     new_params = {
       :class_name => name.to_s.split("_").map{|w| w.capitalize}.join(""),
-      :foreign_key => "#{name}_id",
-      :primary_key => "id"
+      :foreign_key => "#{name}_id".to_sym,
+      :primary_key => "id".to_sym
     }
 
     params.each do |key, value|
@@ -37,7 +37,22 @@ class BelongsToAssocParams < AssocParams
 end
 
 class HasManyAssocParams < AssocParams
+  attr_accessor :name, :params, :foreign_key, :primary_key
   def initialize(name, params, self_class)
+    new_params = {
+      :class_name => name.to_s.camelcase.singularize,
+      :foreign_key => "#{self_class}_id".to_sym,
+      :primary_key => "id".to_sym
+    }
+
+    params.each do |key, value|
+      new_params[key] = value
+    end
+
+    @name = name
+    @params = new_params
+    @foreign_key = new_params[:foreign_key]
+    @primary_key = new_params[:primary_key]
   end
 
   def type
@@ -52,11 +67,16 @@ module Associatable
     aps = BelongsToAssocParams.new(name, params)
     define_method(name) do
       key = self.send(aps.foreign_key)
-      aps.other_class.where({aps.primary_key => key}).first
+      aps.other_class.where(aps.primary_key => key).first
     end
   end
 
   def has_many(name, params = {})
+    aps = HasManyAssocParams.new(name, params, self.class)
+    define_method(name) do
+      key = self.send(aps.primary_key)
+      aps.other_class.where(aps.foreign_key => key)
+    end
   end
 
   def has_one_through(name, assoc1, assoc2)
