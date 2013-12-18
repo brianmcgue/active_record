@@ -31,9 +31,6 @@ class BelongsToAssocParams < AssocParams
     @foreign_key = new_params[:foreign_key]
     @primary_key = new_params[:primary_key]
   end
-
-  def type
-  end
 end
 
 class HasManyAssocParams < AssocParams
@@ -54,17 +51,17 @@ class HasManyAssocParams < AssocParams
     @foreign_key = new_params[:foreign_key]
     @primary_key = new_params[:primary_key]
   end
-
-  def type
-  end
 end
 
 module Associatable
   def assoc_params
+    # decide on a better name -- this will do for the time being
+    @assoc_params ||= {}
   end
 
   def belongs_to(name, params = {})
     aps = BelongsToAssocParams.new(name, params)
+    self.assoc_params[name] = aps
     define_method(name) do
       key = self.send(aps.foreign_key)
       aps.other_class.where(aps.primary_key => key).first
@@ -72,13 +69,34 @@ module Associatable
   end
 
   def has_many(name, params = {})
-    aps = HasManyAssocParams.new(name, params, self.class)
+    aps = HasManyAssocParams.new(name, params, self)
+    self.assoc_params[name] = aps
     define_method(name) do
       key = self.send(aps.primary_key)
       aps.other_class.where(aps.foreign_key => key)
     end
   end
 
-  def has_one_through(name, assoc1, assoc2)
+  def has_one_through(name, through_name, source_name)
+    through_params = self.assoc_params[through_name]
+    define_method(name) do
+      source_params = through_params.other_class.assoc_params[source_name]
+      key1 = self.send(through_params.foreign_key)
+
+      results = DBConnection.execute(<<-SQL, key1)
+        SELECT
+          #{source_params.other_table}.*
+        FROM
+          #{through_params.other_table}
+        JOIN
+          #{source_params.other_table}
+        ON
+          #{through_params.other_table}.#{source_params.foreign_key} = #{source_params.other_table}.#{source_params.primary_key}
+        WHERE
+          #{through_params.other_table}.#{through_params.primary_key} = ?
+      SQL
+
+      source_params.other_class.parse_all(results).first
+    end
   end
 end
