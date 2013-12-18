@@ -17,7 +17,7 @@ class BelongsToAssocParams < AssocParams
   attr_accessor :name, :params, :foreign_key, :primary_key
   def initialize(name, params)
     new_params = {
-      :class_name => name.to_s.split("_").map{|w| w.capitalize}.join(""),
+      :class_name => name.to_s.camelcase.singularize,
       :foreign_key => "#{name}_id".to_sym,
       :primary_key => "id".to_sym
     }
