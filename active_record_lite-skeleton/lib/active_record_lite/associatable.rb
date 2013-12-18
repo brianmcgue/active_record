@@ -91,7 +91,8 @@ module Associatable
         JOIN
           #{source_params.other_table}
         ON
-          #{through_params.other_table}.#{source_params.foreign_key} = #{source_params.other_table}.#{source_params.primary_key}
+          #{through_params.other_table}.#{source_params.foreign_key} = 
+            #{source_params.other_table}.#{source_params.primary_key}
         WHERE
           #{through_params.other_table}.#{through_params.primary_key} = ?
       SQL
